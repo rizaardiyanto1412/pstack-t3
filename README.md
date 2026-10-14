@@ -1,7 +1,7 @@
 # pstack-t3
 
 [poteto's pstack](https://github.com/cursor/plugins/tree/main/pstack) for **T3 Code**, one install for both Claude
-Code and Codex. Private.
+Code and Codex.
 
 ## How it works
 
@@ -52,6 +52,6 @@ zsh -c "$(gh api repos/rizaardiyanto1412/pstack-t3/contents/scripts/setup-machin
 | `scripts/install.sh` | Build and install on this Mac |
 | `scripts/setup-machine.sh` | First-time setup on a Mac (clone + install + daily job) |
 
-pstack is © Lauren Tan (poteto) and contributors, MIT (`upstream/LICENSE`). The T3 adapter was written with
+The adapter and scripts are MIT (`LICENSE`). pstack is © Lauren Tan (poteto) and contributors, MIT (`upstream/LICENSE`). The T3 adapter was written with
 [chhoumann/t3-pstack](https://github.com/chhoumann/t3-pstack) and
 [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude) as references.
