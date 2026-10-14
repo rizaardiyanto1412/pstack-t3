@@ -6,7 +6,7 @@ Code and Codex. Private.
 ## How it works
 
 ```
-cursor/plugins/pstack ──weekly PR──▶ upstream/ (exact copy) ──build──▶ dist/skills ──install──▶ ~/.agents/skills
+cursor/plugins/pstack ──PR on demand──▶ upstream/ (exact copy) ──build──▶ dist/skills ──install──▶ ~/.agents/skills
                                       adapter/ (ours)                                          ~/.claude/skills (links)
 ```
 
@@ -27,7 +27,8 @@ Codex reads `~/.agents/skills` directly; Claude Code reads the links. 52 of the 
 
 ## Updates
 
-1. **Weekly** (Monday 02:00 UTC, or Actions → "Update from upstream pstack" → Run): the workflow copies the newest
+1. **When you want an update**, start the workflow: GitHub → Actions → "Update from upstream pstack" → **Run
+   workflow**, or `gh workflow run update-upstream.yml -R rizaardiyanto1412/pstack-t3`. It copies the newest
    upstream, builds, runs `scripts/check.sh`, and opens a PR with the version change, the changed skills, the
    upstream commits, and any **new Cursor-specific lines**.
 2. **Review and merge.** A new Cursor-specific line means upstream started using a Cursor feature in a new place:
