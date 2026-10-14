@@ -1,0 +1,5 @@
+# Mechanical path rewrites applied to every copied .md file, in order. Format: <literal>\t<replacement>.
+# Everything that is not a plain path lives in t3.md instead, so the skill text stays upstream's.
+~/.cursor/rules/pstack-models.mdc	~/.agents/t3-pstack-models.md
+~/.cursor/skills/	~/.agents/skills/
+.cursor/skills/	.agents/skills/

@@ -1,0 +1,85 @@
+name: Update from upstream pstack
+
+# Weekly: copy the newest cursor/plugins/pstack into upstream/, rebuild, run the Cursor-usage check, and open a
+# pull request. Nothing reaches the Macs until the PR is merged (their daily job installs main).
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get install -y -qq zsh >/dev/null
+
+      - name: Sync upstream
+        id: sync
+        run: |
+          old_version="$(jq -r .version upstream.json)"
+          old_commit="$(jq -r .commit upstream.json)"
+          result="$(./scripts/sync-upstream.sh)"
+          echo "$result"
+          if [ "$result" = "unchanged" ]; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          {
+            echo "changed=true"
+            echo "old_version=$old_version"
+            echo "old_commit=$old_commit"
+            echo "new_version=$(jq -r .version upstream.json)"
+            echo "new_commit=$(jq -r .commit upstream.json)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and check
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          ./scripts/build.sh
+          ./scripts/check.sh | tee check.txt
+
+      - name: Open pull request
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OLD_VERSION: ${{ steps.sync.outputs.old_version }}
+          NEW_VERSION: ${{ steps.sync.outputs.new_version }}
+          OLD_COMMIT: ${{ steps.sync.outputs.old_commit }}
+          NEW_COMMIT: ${{ steps.sync.outputs.new_commit }}
+        run: |
+          branch="update/pstack-$NEW_VERSION-${NEW_COMMIT:0:7}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add upstream upstream.json
+          git commit -q -m "Update pstack $OLD_VERSION → $NEW_VERSION"
+          git push -q -f origin "$branch"
+          commits="$(gh api "repos/cursor/plugins/compare/$OLD_COMMIT...$NEW_COMMIT" \
+            --jq '.commits[] | "- [`\(.sha[0:7])`](\(.html_url)) \(.commit.message | split("\n")[0])"' | head -60 || true)"
+          changed_skills="$(git diff --name-only HEAD~1 -- upstream/skills | cut -d/ -f3 | sort -u | sed 's/^/`/; s/$/`/' | paste -sd ' ' -)"
+          {
+            echo "Upstream pstack **$OLD_VERSION → $NEW_VERSION** ([compare](https://github.com/cursor/plugins/compare/$OLD_COMMIT...$NEW_COMMIT))."
+            echo
+            echo "**Changed skills:** ${changed_skills:-none}"
+            echo
+            echo "### Cursor-specific lines (adapter check)"
+            echo
+            echo "New lines must be covered by \`adapter/t3.md\`. Extend it if not, then run \`scripts/check.sh --accept\` on this branch."
+            echo
+            cat check.txt
+            echo
+            echo "<details><summary>Upstream commits (cursor/plugins, all paths)</summary>"
+            echo
+            echo "${commits:-(compare unavailable)}"
+            echo
+            echo "</details>"
+            echo
+            echo "After merge, each Mac installs \`main\` within a day, or run \`~/.agents/pstack-t3-src/scripts/install.sh\` now."
+          } > body.md
+          existing="$(gh pr list --head "$branch" --json number --jq '.[0].number')"
+          if [ -n "$existing" ]; then gh pr edit "$existing" --body-file body.md; else
+            gh pr create --title "Update pstack $OLD_VERSION → $NEW_VERSION" --body-file body.md --base main --head "$branch"; fi

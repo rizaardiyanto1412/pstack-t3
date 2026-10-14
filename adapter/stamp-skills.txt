@@ -1,0 +1,9 @@
+# Skills that always get the T3 preamble, in addition to the ones build.sh detects through cursor-patterns.txt.
+# These dispatch subagents, schedule, read PR state, or drive a UI in words the patterns do not catch.
+poteto-mode
+teach
+ketchup
+figure-it-out
+maintain-verification-skill
+create-verification-skill
+make-bot-ui

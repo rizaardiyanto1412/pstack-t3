@@ -1,0 +1,13 @@
+# Extended regexes for Cursor-specific text that t3.md must cover. check.sh lists every matching line in the
+# built skills; lines not in known-cursor-lines.txt are new upstream usages to review against t3.md.
+\bTask\b *(tool|call|\()
+subagent_type
+generalPurpose
+environment: *"(cloud|local)"
+readonly: *true
+run_in_background
+\.cursor/
+(grok|gpt|claude)-[0-9][a-z0-9.-]*
+/(babysit|deslop|loop)\b
+cursor-team-kit|create-skill|control-(cli|ui)|AskQuestion
+Cursor

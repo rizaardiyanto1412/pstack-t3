@@ -1,0 +1,1 @@
+> **On T3 Code:** this skill was written for Cursor. Before you spawn a subagent, pick a model, schedule, watch a PR, or use a Cursor-only command or path, read `~/.agents/skills/poteto-mode/references/t3.md`. It overrides this skill on those points.
